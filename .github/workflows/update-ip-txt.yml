@@ -1,4 +1,4 @@
-name: update ip.txt
+name: update ip.txt (speed)
 
 on:
   workflow_dispatch:
@@ -9,7 +9,7 @@ permissions:
   contents: write
 
 jobs:
-  update:
+  build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -20,10 +20,13 @@ jobs:
 
       - name: Generate ip.txt
         env:
-          IPS_SOURCE_URL: ${{ vars.IPS_SOURCE_URL }}
-          OUTPUT_PORT: "443"
-          OUTPUT_LIMIT: "80"
-        run: python scripts/update_ip_txt.py
+          TARGET_HOST: ${{ vars.TARGET_HOST }}
+          PORTS: ${{ vars.PORTS }}
+          SAMPLE_IPS: ${{ vars.SAMPLE_IPS }}
+          OUTPUT_LIMIT: ${{ vars.OUTPUT_LIMIT }}
+          CONCURRENCY: ${{ vars.CONCURRENCY }}
+          TIMEOUT_SEC: ${{ vars.TIMEOUT_SEC }}
+        run: python scripts/gen_ip_txt.py
 
       - name: Commit changes
         run: |
@@ -31,7 +34,7 @@ jobs:
             git config user.name "github-actions[bot]"
             git config user.email "github-actions[bot]@users.noreply.github.com"
             git add ip.txt
-            git commit -m "chore: auto update ip.txt"
+            git commit -m "chore: update ip.txt"
             git push
           else
             echo "No changes"
