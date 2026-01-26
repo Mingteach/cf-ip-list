@@ -51,9 +51,7 @@ async def probe_tls(ip: str, port: int, server_name: str, timeout: float) -> flo
 
 
 async def run() -> None:
-    target_host = read_env("TARGET_HOST", "")
-    if not target_host:
-        raise SystemExit("Missing TARGET_HOST")
+    target_host = read_env("TARGET_HOST", "www.cloudflare.com")
 
     ports_raw = read_env("PORTS", "443,2053,2083,2087,2096,8443")
     ports = []
@@ -67,10 +65,27 @@ async def run() -> None:
     if not ports:
         raise SystemExit("No valid PORTS")
 
-    sample_ips = int(read_env("SAMPLE_IPS", "600"))
-    output_limit = int(read_env("OUTPUT_LIMIT", "80"))
-    concurrency = int(read_env("CONCURRENCY", "250"))
-    timeout_sec = float(read_env("TIMEOUT_SEC", "2.5"))
+    try:
+        sample_ips = int(read_env("SAMPLE_IPS", "600"))
+    except ValueError:
+        sample_ips = 600
+    try:
+        output_limit = int(read_env("OUTPUT_LIMIT", "80"))
+    except ValueError:
+        output_limit = 80
+    try:
+        concurrency = int(read_env("CONCURRENCY", "250"))
+    except ValueError:
+        concurrency = 250
+    try:
+        timeout_sec = float(read_env("TIMEOUT_SEC", "2.5"))
+    except ValueError:
+        timeout_sec = 2.5
+
+    sample_ips = max(1, sample_ips)
+    output_limit = max(1, output_limit)
+    concurrency = max(1, min(concurrency, sample_ips))
+    timeout_sec = max(0.2, timeout_sec)
 
     cidrs = fetch_lines("https://www.cloudflare.com/ips-v4")
     if not cidrs:
