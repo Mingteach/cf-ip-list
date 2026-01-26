@@ -20,12 +20,12 @@ jobs:
 
       - name: Generate ip.txt
         env:
-          TARGET_HOST: ${{ vars.TARGET_HOST }}
-          PORTS: ${{ vars.PORTS }}
-          SAMPLE_IPS: ${{ vars.SAMPLE_IPS }}
-          OUTPUT_LIMIT: ${{ vars.OUTPUT_LIMIT }}
-          CONCURRENCY: ${{ vars.CONCURRENCY }}
-          TIMEOUT_SEC: ${{ vars.TIMEOUT_SEC }}
+          TARGET_HOST: ${{ vars.TARGET_HOST || 'www.cloudflare.com' }}
+          PORTS: ${{ vars.PORTS || '443,2053,2083,2087,2096,8443' }}
+          SAMPLE_IPS: ${{ vars.SAMPLE_IPS || '600' }}
+          OUTPUT_LIMIT: ${{ vars.OUTPUT_LIMIT || '80' }}
+          CONCURRENCY: ${{ vars.CONCURRENCY || '250' }}
+          TIMEOUT_SEC: ${{ vars.TIMEOUT_SEC || '2.5' }}
         run: python scripts/gen_ip_txt.py
 
       - name: Commit changes
